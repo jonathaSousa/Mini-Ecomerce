@@ -1,7 +1,8 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from pathlib import Path
+
 
 DB_PATH = Path(__file__).resolve().parent
 
@@ -13,7 +14,7 @@ Session = sessionmaker(bind=engine)
 
 Base = declarative_base()
 
-metadata = Base.metadata
+metadata = Base.metadata 
 
 def get_db():
     db = Session()
