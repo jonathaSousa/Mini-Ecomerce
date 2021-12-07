@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends,status
 from app.models.models import Product
 from .schemas import ProductSchema, ShowProductSchema
-from app.repo.product_repository import ProductRepository
+from app.repositories.product_repository import ProductRepository
 from  typing import List
 
 router = APIRouter()

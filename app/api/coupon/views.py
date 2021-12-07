@@ -1,36 +1,30 @@
-from fastapi import APIRouter, Depends,status
+from typing import List
+from fastapi import APIRouter, status, Depends
+
 from app.models.models import Coupon
+from .schemas import CouponSchema, ShowCouponSchema, UpdateCouponSchema
+from app.repositories.coupon_repository import CouponRepository
 from app.services.coupon_service import CouponService
-from .schemas import CouponSchema,ShowCouponSchema, UpdateCouponSchema
-from fastapi.exceptions import HTTPException
-from app.repo.coupon_repository import CouponRepository
-from  typing import List
 
+from app.services.auth_service import only_admin
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(only_admin)])
 
-@router.post('/',status_code=status.HTTP_201_CREATED)
-def create(coupon:CouponSchema,service:CouponService = Depends()):
-    service.create_coupon(coupon)
+@router.post('/', status_code=status.HTTP_201_CREATED)
+def create(coupon: CouponSchema, repository: CouponRepository = Depends()):
+    #repository.create(Coupon(**coupon.dict()))
+    CouponService.create_coupon(Coupon(**Coupon.dict()))
 
-
-@router.get('/',response_model=List[ShowCouponSchema])
+@router.get('/', response_model=List[ShowCouponSchema])
 def index(repository: CouponRepository = Depends()):
     return repository.get_all()
 
-@router.put('/{id}')
-def update(id:int,coupon:UpdateCouponSchema,repository: CouponRepository = Depends()):
-    repository.update(id,coupon.dict())
-
-    
-     
-@router.get('/{id}')
-def show(id:int, repository: CouponRepository = Depends()):
+@router.get('/{id}', response_model=ShowCouponSchema)
+def show(id: int, repository: CouponRepository = Depends()):
     return repository.get_by_id(id)
 
-@router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_coupon(id: int,repository: CouponRepository = Depends()):
-    result=repository.delete(id)
-    if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail = f'Coupon com o id:{id} não encontrado')
+
+@router.put('/{id}')
+def update(id: int, coupon: UpdateCouponSchema, repository: CouponRepository = Depends()):   
+    CouponService.update_coupon(id, coupon)
+

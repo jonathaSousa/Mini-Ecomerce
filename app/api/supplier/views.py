@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends,status
 from app.models.models import Supplier
 from .schemas import SupplierSchema, ShowSupplierSchema
-from app.repo.supplier_repository import SupplierRepository
+from app.repositories.supplier_repository import SupplierRepository
 from  typing import List
 
 

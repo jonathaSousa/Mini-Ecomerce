@@ -1,29 +1,20 @@
-from fastapi import APIRouter, Depends,status
-from app.repo.product_discount import ProductDiscountRepository
+from typing import List
+from fastapi import APIRouter, status
+from fastapi.param_functions import Depends
+
+from app.repositories.product_discount import ProductDiscountRepository
+from app.models.models import ProductDiscount
+from .schemas import ProductDiscountSchema, ShowProductDiscountSchema
 from app.services.product_discount_service import ProductDiscountService
-from .schemas import ShowProductDiscountSchema, ProductDiscountSchema
+from app.services.auth_service import only_admin
 
-from  typing import List
+router = APIRouter(dependencies=[Depends(only_admin)])
 
-router = APIRouter()
+@router.post('/', status_code=status.HTTP_201_CREATED)
+def create(product_discount: ProductDiscountSchema, repository: ProductDiscountRepository = Depends()):
+    ProductDiscountService.create_discount(product_discount)
 
-
-
-
-@router.post('/',status_code=status.HTTP_201_CREATED)
-def create(product_discount: ProductDiscountSchema, service:ProductDiscountService = Depends()):
-    service.create_discount(product_discount.product_id,product_discount.payment_method_id)
-   
-    
-@router.get('/',response_model=List[ShowProductDiscountSchema])
+@router.get('/', response_model=List[ShowProductDiscountSchema])
 def index(repository: ProductDiscountRepository = Depends()):
-    return repository.get_all()
-
-@router.put('/{id}')
-def update(id:int,product_discount:ProductDiscountSchema,repository: ProductDiscountRepository = Depends()):
-    repository.update(id,product_discount.dict())
-
-
-@router.get('/{id}')
-def show(id:int, repository: ProductDiscountRepository = Depends()):
-    return repository.get_by_id(id)
+  
+    ProductDiscountService.listar()

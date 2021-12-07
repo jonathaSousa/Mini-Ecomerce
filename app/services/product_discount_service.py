@@ -1,10 +1,9 @@
-from fastapi import  Depends,status,HTTPException
-from app.models.models import  ProductDiscount
-from app.repo.payment_method import PaymentMethodRepository
-from app.repo.product_discount import ProductDiscountRepository
+from fastapi import Depends
+from app.common.exceptions import PaymentMethodDiscountAlreadyExistsException, PaymentMethodsNotAvailableException
+from app.models.models import ProductDiscount
+from app.repositories.payment_method import PaymentMethodRepository
+from app.repositories.product_discount import ProductDiscountRepository
 from app.api.product_discount.schemas import ProductDiscountSchema
-
-
 
 
 class ProductDiscountService:
@@ -12,18 +11,19 @@ class ProductDiscountService:
                  product_discount_repository: ProductDiscountRepository = Depends()):
         self.payment_method_repository = payment_method_repository
         self.product_discount_repository = product_discount_repository
-        
+
     def create_discount(self, discount: ProductDiscountSchema):
-        if not self.payment_method_repository.is_enabled(discount.payment_method_id):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Não poderá ser criado o desconto para essa forma de pagamento")
+        payment_method = self.payment_method_repository.get_by_id(
+            discount.payment_method_id)
 
-        if not self.product_discount_repository.have_discount(discount.product_id,discount.payment_method_id):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Ja existe um desconto para essa forma de pagamento")
-        
-        self.product_discount_repository.create(ProductDiscount(**discount.dict()))
+        if not payment_method or not payment_method.enabled:
+            raise PaymentMethodsNotAvailableException()
 
+        find_payment_method_existence = self.product_discount_repository.filter(
+            {'product_id': discount.product_id, 'payment_method_id': discount.payment_method_id})
 
+        if find_payment_method_existence:
+            raise PaymentMethodDiscountAlreadyExistsException()
 
-    
-        
-            
+        self.product_discount_repository.create(
+            ProductDiscount(**discount.dict()))

@@ -1,23 +1,24 @@
-from fastapi import  Depends,status,HTTPException
-from app.models.models import  Address
-from app.repo.customer_repo import CustomerRepository
-from app.repo.address_repository import AddressRepository
-from app.api.address.schemas import AddressSchema
-
-
-
+from fastapi import Depends, HTTPException, status
+from app.api.address.schemas import AddressSchema, ShowAddressSchema
+from app.models.models import Address
+from app.repositories.address_repository import AddressRepository
+from app.repositories.customer_repo import CustomerRepository
 
 class AddressService:
-    def __init__(self, customer_repository: CustomerRepository = Depends(),
-                 address_repository: AddressRepository= Depends()):
-        self.customer_repository = customer_repository 
-        self. address_repository = address_repository
+    def __init__(self, address_repository: AddressRepository = Depends(), customer_repository: CustomerRepository = Depends()):
+        self.address_repository = address_repository
+        self.customer_repository = customer_repository
 
     def create_address(self, address: AddressSchema):
-        print("address",address)
-        customer_address = self.address_repository.has_customer_id(address.customer_id)
-        print("customer",customer_address)
-        if customer_address:
-            self.address_repository.update(customer_address.id,primary = False)
 
-        self.address_repository.create(Address(**address.dict()))
+        if not self.customer_repository.get_by_id(address.customer_id):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Nota customer')
+        if address.primary:
+            self.address_repository.remove_primary()
+            
+        self.AddressRepository.create(**address.dic())
+                
+    def update_address(self, address: AddressSchema):
+        AddressRepository.update()
+
+    

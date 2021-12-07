@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends,status
 from app.models.models import Category
 from .schemas import CategorySchema, ShowCategorySchema
-from app.repo.category_repository import CategoryRepository
+from app.repositories.category_repository import CategoryRepository
 from  typing import List
 
 
