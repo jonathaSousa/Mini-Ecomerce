@@ -1,27 +1,30 @@
-from fastapi import APIRouter, Depends,status
-from app.models.models import PaymentMethod
-from app.api.payment_method.schemas import PaymentMethodSchema, ShowPaymentMethodSchema
-from app.repositories.payment_method import PaymentMethodRepository
-from  typing import List
+from fastapi import APIRouter,Depends
+
+from app.repositories.order_repository import OrderRepository
+from app.services.order_service import OrderService
+from .schemas import OrderSchema, OrderStatusSchema, ShowOrderStatusSchema
+
+router = APIRouter()
+
+from app.services.auth_service import get_customer_user
+router = APIRouter(dependencies=[])
 
 
-from app.services.auth_service import get_user, only_admin
-router = APIRouter(dependencies=[Depends(only_admin)])
 
-@router.post('/',status_code=status.HTTP_201_CREATED)
-def create(payment_method:PaymentMethodSchema,repository: PaymentMethodRepository = Depends()):
-    repository.create(PaymentMethod(**payment_method.dict()))
-
-@router.get('/',response_model=List[ShowPaymentMethodSchema])
-def index(repository: PaymentMethodRepository = Depends()):
-    return repository.get_all()
-    
+@router.post('/')
+def create(order: OrderSchema, service:OrderService = Depends() ):
+    service.create_order(order)
 
 @router.put('/{id}')
-def update(id:int,payment_method:PaymentMethodSchema,repository: PaymentMethodRepository = Depends()):
-     repository.update(id,payment_method.dict())
+def update(id:int, orderstatus:OrderStatusSchema, order_repository:OrderRepository = Depends()):
+    order_repository.create_order_product(id, orderstatus.dict())
+    
 
+
+@router.get('/')
+def index(repository: OrderRepository = Depends()):
+    return repository.get_all()
 
 @router.get('/{id}')
-def show(id:int, repository: PaymentMethodRepository = Depends()):
+def show(id:int,repository: OrderRepository = Depends()):
     return repository.get_by_id(id)
