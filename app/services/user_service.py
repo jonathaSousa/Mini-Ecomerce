@@ -1,23 +1,47 @@
-from fastapi import Depends, HTTPException, status
-from starlette.status import HTTP_409_CONFLICT
-from app.api.coupon.schemas import CouponSchema
-from app.api.user.schemas import UserSchema, ShowUserSchema
-from app.models.models import User
-from app.repositories.user_repo import UserRepository
+from fastapi import  Depends,status,HTTPException
+from app.api.customer.schemas import CustomerUserSchema
+from app.models.models import  User
+from app.repositories.user_repo import  UserRepository
+from app.api.user.schemas import UserSchema
 import bcrypt
 
-from app.services.auth_service import authenticate
+
+
 
 class UserService:
-    def __init__(self, user_repository: UserRepository = Depends()):
-        self.user_repository = user_repository
+    def __init__(self, user_repository:   UserRepository = Depends()):
+                self.user_repository = user_repository
+                
 
-    def create_user(self, user: UserSchema = Depends(authenticate)):
+    def create_user(self, email,user: UserSchema):
+        email_DB = self.user_repository.find_by_email(email)
+        if  email_DB:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="email already exists")
+        
         user.password = bcrypt.hashpw(
-        user.password.encode('utf8'), bcrypt.gensalt())
-    
-        if self.user_repository.query(User).filter(User.email == user.email):
-            raise HTTPException(status_code = status.HTTP_409_CONFLICT, detail='Email nao pode ser alterado')
-       
-       
-        UserRepository.create(User(**user.dict()))
+            user.password.encode('utf8'), bcrypt.gensalt())
+        
+        self.user_repository.create(User(**user.dict())) 
+
+    def create_customer_user(self, customer:CustomerUserSchema):
+        email_DB = self.user_repository.find_by_email(customer.email)
+        if  email_DB:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="email already exists")
+        
+        customer.password = str(bcrypt.hashpw(
+            customer.password.encode('utf8'), bcrypt.gensalt()
+        ))
+        
+        customer_data = customer.dict()
+        customer_data.update({"role":"customer"})
+        return self.user_repository.create(User(**customer_data)) 
+
+
+
+
+def update_user(self,user: UserSchema): 
+    if not   self.user_repository.find_email_id(self.user.id,self.user.email):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="user already exists")
+    user.password = bcrypt.hashpw(
+    user.password.encode('utf8'), bcrypt.gensalt())
+    self.user_repository.update(User(**user.dict())) 

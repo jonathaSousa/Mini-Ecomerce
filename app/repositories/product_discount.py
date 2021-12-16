@@ -1,12 +1,19 @@
+   
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from app.models.models import ProductDiscount
 from .base_repository import BaseRepository
 
+
 class ProductDiscountRepository(BaseRepository):
     def __init__(self, session: Session = Depends(get_db)):
         super().__init__(session, ProductDiscount)
 
-    def get_product_payment(self, product_id: int, payment_id: int):
-        return self.session.query(self.model).filter(product_id = product_id, payment_id = payment_id).first()
+    
+    def have_discount(self, product_id,payment_method_id ):
+        query = self.session.query(self.model).filter_by(product_id = product_id, payment_method_id=payment_method_id).first()
+        return query != None
+    
+    def remove(self, id):
+        self.query().filter_by(id=id).delete()

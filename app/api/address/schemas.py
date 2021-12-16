@@ -1,20 +1,16 @@
 from pydantic import BaseModel
 
 class AddressSchema(BaseModel):
-    addresses = str
-    city = str
-    state = str
-    number = str
-    zicode = str
-    neighbourhood = str
+    address: str
+    city:str
+    state:str
+    number:str
+    zipcode:str
+    neighbourhood:str
+    primary:bool
+    customer_id:int
 
 class ShowAddressSchema(AddressSchema):
-    addresses = str
-    city = str
-    state = str
-    number = str
-    zicode = str
-    neighbourhood = str
-
-    class config:
+    id: int
+    class Config:
         orm_mode = True

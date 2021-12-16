@@ -1,27 +1,38 @@
 from datetime import date
 from pydantic import BaseModel
 
-class CustomerSchema(BaseModel):
 
-    first_name: str
-    last_name: float
-    phone_number: str
-    genre: str
-    document_id: str 
-    birth_date: date
-    user_id: int
+class CustomerUserSchema(BaseModel):
+    display_name: str
+    email: str
+    password: str
 
-class ShowCustomerSchema(CustomerSchema):
+class BaseCustomerSchema(BaseModel):
+    first_name :str
+    last_name :str
+    phone_number : str
+    genre : str
+    birth_date : date
+    user : CustomerUserSchema
+
+
+
+
+class CreateCustomerSchema(BaseCustomerSchema):
+    document_id :str
+    
+class UpdateCustomerSchema(BaseCustomerSchema):
+    pass
+
+
+
+class ShowCustomerSchema(BaseModel):
     id: int
-    first_name: str
-    last_name: str
-
-    class config:
+    first_name :str
+    last_name :str
+    phone_number : str
+    genre : str
+    birth_date : date
+    user_id: str
+    class Config:
         orm_mode = True
-
-class UpdateCustomerSchema(CustomerSchema):
-    first_name: str
-    last_name: float
-    phone_number: str
-    genre: str
-    birth_date: date

@@ -1,23 +1,26 @@
-from pydantic import BaseModel
-from app.api.product.schemas import ProductSchema
-from app.api.payment_method.schemas import PaymentMethodSchema
-from enum import Enum
 
-class DiscountMode(str, Enum):
+from typing import Optional
+
+from pydantic import BaseModel
+from sqlalchemy import orm
+from enum import Enum
+from app.api.product.schemas import ShowProductSchema
+from app.api.payment_method.schemas import ShowPaymentMethodSchema
+
+
+class DiscountMode(str,Enum):
     VALUE = 'value'
-    PERCENTAGE = 'percentage'
+    PERCENTAGEM = 'percentage'
 
 class ProductDiscountSchema(BaseModel):
-    id: int
-    product_id: int
     mode: DiscountMode
     value: float
-    payment_method_id: int
+    product_id: int
+    payment_method_id:int
 
-class ShowProductDiscountSchema(ProductDiscountSchema):
+class ShowProductDiscountSchema( ProductDiscountSchema):
     id: int
-    payment_methods: PaymentMethodSchema
-    product: ProductSchema
-
-    class config:
+    product:ShowProductSchema
+    payment_method:ShowPaymentMethodSchema
+    class Config:
         orm_mode = True
